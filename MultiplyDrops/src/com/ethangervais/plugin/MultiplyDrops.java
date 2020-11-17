@@ -5,6 +5,8 @@ import java.util.Collection;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,11 +16,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MultiplyDrops extends JavaPlugin implements Listener {
-	private int dropAmount = 1;
+	private int dropAmount;
 
 	@Override
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
+		dropAmount = 1;
 	}
 
 	@Override
@@ -26,23 +29,36 @@ public class MultiplyDrops extends JavaPlugin implements Listener {
 
 	}
 
-	@EventHandler
-	public void onBlockBreak(BlockBreakEvent event) {
-		Block block = event.getBlock();
-		Location loc = block.getLocation();
-
-		Collection<ItemStack> drops = block.getDrops();
-
-		loc.getBlock().setType(Material.AIR);
-
-		for (ItemStack drop : drops) {
-			for (int i = 0; i < dropAmount; i++) {
-				loc.getWorld().dropItemNaturally(loc, new ItemStack(drop));
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (sender instanceof Player) {
+			if (cmd.getName().equalsIgnoreCase("dropsreset")) {
+				dropAmount = 1;
 			}
 		}
 
-		event.setCancelled(true);
-		dropAmount++;
+		return true;
+	}
+
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent event) {
+		if (event.getPlayer() instanceof Player) {
+			Block block = event.getBlock();
+			Location loc = block.getLocation();
+
+			Collection<ItemStack> drops = block.getDrops();
+
+			loc.getBlock().setType(Material.AIR);
+
+			for (ItemStack drop : drops) {
+				for (int i = 0; i < dropAmount; i++) {
+					loc.getWorld().dropItemNaturally(loc, new ItemStack(drop));
+				}
+			}
+
+			event.setCancelled(true);
+			dropAmount++;
+		}
 	}
 
 	@EventHandler
@@ -56,7 +72,7 @@ public class MultiplyDrops extends JavaPlugin implements Listener {
 					loc.getWorld().dropItemNaturally(loc, new ItemStack(drop));
 				}
 			}
-			
+
 			dropAmount++;
 		} else {
 			return;

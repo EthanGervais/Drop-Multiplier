@@ -3,3 +3,6 @@ main: com.ethangervais.plugin.MultiplyDrops
 version: 1.0
 api-version: 1.16
 commands:
+   dropsreset:
+      description: Resets the drop amount back to 1.
+      usage: /<command>
